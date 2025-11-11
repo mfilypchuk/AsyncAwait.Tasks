@@ -31,31 +31,34 @@ public class Startup
         });
 
         services.AddSingleton<IStatisticService, CloudStatisticService>();
-        services.AddSingleton<ISupportService, CloudSupportService>();
-        services.AddSingleton<IPrivacyDataService, PrivacyDataService>();
-        services.AddScoped<IAssistant, ManualAssistant>();
+        services.AddTransient<ISupportService, CloudSupportService>();
+        services.AddTransient<IPrivacyDataService, PrivacyDataService>();
+        services.AddTransient<IAssistant, ManualAssistant>();
 
-        services.AddMvc(options => options.EnableEndpointRouting = false);
+        services.AddControllersWithViews();
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
-        if (false && env.IsDevelopment())
+        if (env.IsDevelopment())
             app.UseDeveloperExceptionPage();
-        app.UseExceptionHandler("/Home/Error");
+        else
+            app.UseExceptionHandler("/Home/Error");
 
-        app.UseStatistic();
 
         app.UseHttpsRedirection();
         app.UseStaticFiles();
-        app.UseCookiePolicy();
 
-        app.UseMvc(routes =>
+        app.UseRouting();
+
+        app.UseStatistic();
+
+        app.UseEndpoints(endpoints =>
         {
-            routes.MapRoute(
-                "default",
-                "{controller=Home}/{action=Index}/{id?}");
+            endpoints.MapControllerRoute(
+                name: "default",
+                pattern: "{controller=Home}/{action=Index}/{id?}");
         });
     }
 }
